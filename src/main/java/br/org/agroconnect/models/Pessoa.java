@@ -13,13 +13,13 @@ public class Pessoa {
         this.nmNome = nmNome;
         this.nrCpf = nrCpf;
         this.cdUsuario = cdUsuario;
-        this.tpUsuario = tpUsuario;
+        setTpUsuario(tpUsuario);
     }
 
     public Pessoa(String nmNome, String nrCpf, String tpUsuario) {
         this.nmNome = nmNome;
         this.nrCpf = nrCpf;
-        this.tpUsuario = tpUsuario;
+        setTpUsuario(tpUsuario);
     }
 
     public String getNmNome() { return nmNome; }
@@ -32,5 +32,11 @@ public class Pessoa {
     public void setCdUsuario(UUID cdUsuario) { this.cdUsuario = cdUsuario; }
 
     public String getTpUsuario() { return tpUsuario; }
-    public void setTpUsuario(String tpUsuario) { this.tpUsuario = tpUsuario; }
+    public void setTpUsuario(String tpUsuario) {
+        if (!"especialista".equalsIgnoreCase(tpUsuario) && !"agricultor".equalsIgnoreCase(tpUsuario)) {
+            throw new IllegalArgumentException("Tipo de usuário inválido. Aceito apenas 'especialista' ou 'agricultor'.");
+        }
+        this.tpUsuario = tpUsuario.toLowerCase();
+    }
+
 }
