@@ -5,6 +5,7 @@ import br.org.agroconnect.factory.ConnectionFactory;
 import br.org.agroconnect.models.Usuario;
 
 import java.nio.ByteBuffer;
+import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +27,7 @@ public class UsuarioDao {
         PreparedStatement stm = conexao.prepareStatement(sql);
         stm.setBytes(1, uuidToBytes(usuario.getCdUsuario()));
         stm.setString(2, usuario.getDsEmail());
-        stm.setString(3, usuario.getDsSenha());
+        stm.setString(3, hashSenha(usuario.getDsSenha()));
         stm.executeUpdate();
     }
 
@@ -60,7 +61,7 @@ public class UsuarioDao {
         String sql = "UPDATE TB_USUARIO SET ds_email = ?, ds_senha = ? WHERE cd_usuario = ?";
         PreparedStatement stm = conexao.prepareStatement(sql);
         stm.setString(1, usuario.getDsEmail());
-        stm.setString(2, usuario.getDsSenha());
+        stm.setString(2, hashSenha(usuario.getDsSenha()));
         stm.setBytes(3, uuidToBytes(usuario.getCdUsuario()));
         stm.executeUpdate();
     }
@@ -96,6 +97,25 @@ public class UsuarioDao {
         long low = bb.getLong();
         return new UUID(high, low);
     }
+
+    private String hashSenha(String senha) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(senha.getBytes("UTF-8"));
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar hash da senha", e);
+        }
+    }
+
 
     public void fecharConexao() throws SQLException {
         conexao.close();
